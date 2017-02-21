@@ -61,6 +61,7 @@ for SOFTWARE in $SOFTWARES ; do
   fi
 done
 
+# check for required python modules
 for MODULE in $MODULES ; do
   [[ "$MODULE" =~ (.*),(.*) ]]
   IMPORT_NAME="${BASH_REMATCH[1]}"
@@ -75,8 +76,6 @@ for MODULE in $MODULES ; do
     exit 1
   fi
 done
-
-exit 5
 
 # check current directory
 if [ "$PWD" != "/etc/letsencrypt-ssl" ] ; then
@@ -100,6 +99,7 @@ while [[ "$CONFIG_NOT_DONE" != "" ]] ; do
   CONFIG_NOT_DONE="$(fgrep -i xxx config | head -1)"
 done
 
+# setup domains.txt
 if [[ ! -f domains.txt ]] || fgrep example domains.txt /dev/null 2>&1 ; then
   echo -e  "\n${MAG}It appears that the ${RED}domains.txt${MAG} file contians the example content${NORM}"
   echo -e    "${GREEN} - It should have one or more lines of space separated domain names${NORM}"
@@ -123,16 +123,19 @@ for d in $FOLDERS ; do
 done
 echo ""
 
+# download & install dehydrated script
 echo -e "\n${GREEN}Downloading dehydrated BASH tool from github...${NORM}\n"
 curl -L "https://codeload.github.com/lukas2511/dehydrated/zip/master" -o install/dehydrated.zip
 echo -e "\n${GREEN}Installing dehydrated BASH tool...${NORM}\n"
 unzip -jo install/dehydrated.zip "*/dehydrated" -d bin
 
+# download & install hover-cli
 echo -e "\n${GREEN}Downloading hover tool from github...${NORM}\n"
 curl -L "https://github.com/mscalora/hover-cli/zipball/master/" -o install/hover-cli.zip
 echo -e "\n${GREEN}Installing hover tool...${NORM}\n"
 unzip -jo install/hover-cli.zip "*/hover*.py" -d bin
 
+# hover credentials setup
 if [ ! -f ".hover/hover-api-storage" ] ; then
   echo -e "\n${GREEN}Setup hover account credentials by entering accout info now...${NORM}\n"
 fi
@@ -144,6 +147,7 @@ echo -e "\n${GREEN}Your current DNS entries have been backed up to $BACKUP${NORM
 
 echo -e "\n${GREEN}You can rerun this script at any time" '(as root, in the /etc/letsencrypt-ssl directory)' "to validate hover credentials and perform DNS backup${NORM}"
 
+# cron job setup
 CRON1='21 2 * * 0 /etc/letsencrypt-ssl/letsencrypt-cron.sh >>/var/log/letsencrypt-ssl.cron.log 2>&1'
 CRON2='36 2 * * 0 /etc/letsencrypt-ssl/status-sender-cron.sh >>/var/log/letsencrypt-ssl.cron.log 2>&1'
 
@@ -179,5 +183,6 @@ if ! bin/dehydrated --register ; then
   fi
 fi
 
+# done
 echo -e "\n${GREEN}Setup complete, you can now run the following command to issue certs:${NORM}"
 echo -e "\n${GREEN}    ${MAG}./letsencrypt-cron.sh{GREEN} ${NORM}\n"

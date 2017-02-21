@@ -148,25 +148,29 @@ echo -e "\n${GREEN}Your current DNS entries have been backed up to $BACKUP${NORM
 echo -e "\n${GREEN}You can rerun this script at any time" '(as root, in the /etc/letsencrypt-ssl directory)' "to validate hover credentials and perform DNS backup${NORM}"
 
 # cron job setup
-CRON1='21 2 * * 0 /etc/letsencrypt-ssl/letsencrypt-cron.sh >>/var/log/letsencrypt-ssl.cron.log 2>&1'
-CRON2='36 2 * * 0 /etc/letsencrypt-ssl/status-sender-cron.sh >>/var/log/letsencrypt-ssl.cron.log 2>&1'
+if crontab -l | fgrep letsencrypt-cron >/dev/null 2>&1 ; then
+  echo -e -n "\n${MAG}cron job appears to be installed already${NORM}"
+else
+  CRON1='21 2 * * 0 /etc/letsencrypt-ssl/letsencrypt-cron.sh >>/var/log/letsencrypt-ssl.cron.log 2>&1'
+  CRON2='36 2 * * 0 /etc/letsencrypt-ssl/status-sender-cron.sh >>/var/log/letsencrypt-ssl.cron.log 2>&1'
 
-echo -e "\n${GREEN}Suggested cron settings:${NORM}\n"
-echo -e "    # check and reissues certs as needed weekly, Sunday mornig at 2:21am"
-echo    "    $CRON1"
-echo -e "    # send weekly certificate status, hover credential check and do DNS backup, Sunday at 2:36am [optional]"
-echo    "    $CRON2"
-echo -e ""
-echo -e -n "\n${MAG}Do you wish to automatically add these cron jobs?${NORM}"
-inquire
-if [[ "$answer" == "y" ]] ; then
-  CTEMP="$(mktemp --tmpdir lets-cron.XXXXX)"
-  crontab -l >"$CTEMP"
-  echo "" >>"$CTEMP"
-  echo "$CRON1" >>"$CTEMP"
-  echo "$CRON2" >>"$CTEMP"
-  crontab "$CTEMP"
-  rm "$CTEMP"
+  echo -e "\n${GREEN}Suggested cron settings:${NORM}\n"
+  echo -e "    # check and reissues certs as needed weekly, Sunday mornig at 2:21am"
+  echo    "    $CRON1"
+  echo -e "    # send weekly certificate status, hover credential check and do DNS backup, Sunday at 2:36am [optional]"
+  echo    "    $CRON2"
+  echo -e ""
+  echo -e -n "\n${MAG}Do you wish to automatically add these cron jobs?${NORM}"
+  inquire
+  if [[ "$answer" == "y" ]] ; then
+    CTEMP="$(mktemp --tmpdir lets-cron.XXXXX)"
+    crontab -l >"$CTEMP"
+    echo "" >>"$CTEMP"
+    echo "$CRON1" >>"$CTEMP"
+    echo "$CRON2" >>"$CTEMP"
+    crontab "$CTEMP"
+    rm "$CTEMP"
+  fi
 fi
 
 # set up letsencrypt account with dehydrated

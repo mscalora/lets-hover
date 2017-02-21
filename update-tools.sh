@@ -10,7 +10,7 @@ MAG="$(tput setaf 5)"
 NORM="$(tput sgr0)"
 
 VEDITOR="${FCEDIT:-${VISUAL:-${EDITOR:-nano}}}"
-if ! which "$ED" >/dev/null 2>&2 ; then
+if ! which "$VEDITOR" >/dev/null 2>&2 ; then
   VEDITOR=vi
 fi
 
@@ -189,4 +189,4 @@ fi
 
 # done
 echo -e "\n${GREEN}Setup complete, you can now run the following command to issue certs:${NORM}"
-echo -e "\n${GREEN}    ${MAG}./letsencrypt-cron.sh{GREEN} ${NORM}\n"
+echo -e "\n${GREEN}    ${MAG}./letsencrypt-cron.sh${NORM}\n"
